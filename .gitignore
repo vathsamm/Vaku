@@ -1,0 +1,16 @@
+node_modules/
+build/
+dist/
+coverage/
+.DS_Store
+*.log
+.env*
+!.env.example
+video_cache/
+temp_downloads/
+temp_merges/
+temp_uploads/
+temp_tg_split/
+db_backups/
+yt-dlp*
+bun.lock

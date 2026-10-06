@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en" style="background-color: #030712; color: #ffffff;">
+  <head>
+    <script>
+      // Suppress Vite dev WebSocket / HMR connection errors per runtime constraints (HMR disabled in AI Studio iframe)
+      (function() {
+        var _origErr = console.error;
+        var _origWarn = console.warn;
+        console.error = function() {
+          var f = arguments[0];
+          if (typeof f === 'string' && (f.indexOf('[vite]') !== -1 || f.indexOf('WebSocket') !== -1 || f.indexOf('ws://') !== -1 || f.indexOf('wss://') !== -1)) {
+            return;
+          }
+          return _origErr.apply(console, arguments);
+        };
+        console.warn = function() {
+          var f = arguments[0];
+          if (typeof f === 'string' && (f.indexOf('[vite]') !== -1 || f.indexOf('WebSocket') !== -1 || f.indexOf('ws://') !== -1 || f.indexOf('wss://') !== -1)) {
+            return;
+          }
+          return _origWarn.apply(console, arguments);
+        };
+      })();
+    </script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content" />
+    <title>Vd v4.5</title>
+    <meta name="description" content="Studio Video Editor &amp; Reel Maker with 100% offline mobile editing, in-device HD render, and instant cloud sync." />
+    <meta property="og:title" content="Vd v4.5" />
+    <meta property="og:description" content="Studio Video Editor &amp; Reel Maker with 100% offline mobile editing, in-device HD render, and instant cloud sync." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="theme-color" content="#030712" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Vd Studio" />
+    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/pwa-192x192.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo+Black&family=Montserrat:ital,wght@0,700..900;1,700..900&family=Outfit:wght@700;800;900&family=Poppins:wght@700;800;900&family=Rubik:wght@700;800;900&family=Syne:wght@700;800&family=Noto+Color+Emoji&display=swap" rel="stylesheet">
+    <script>
+      // Global circular structure safety guard for JSON.stringify (prevents crashes from DOM elements like HTMLVideoElement and React Fibers)
+      (function() {
+        var _nativeStringify = JSON.stringify;
+        JSON.stringify = function(value, replacer, space) {
+          if (value !== null && typeof value === 'object') {
+            // If the root object itself is a DOM element (such as HTMLVideoElement)
+            if (value instanceof Element || (typeof value.nodeType === 'number' && typeof value.tagName === 'string') || value.constructor?.name === 'HTMLVideoElement') {
+              return _nativeStringify.call(this, {
+                _type: 'DOMElement',
+                tagName: value.tagName || 'VIDEO',
+                id: value.id || '',
+                src: (typeof value.src === 'string' ? value.src : '')
+              }, null, space);
+            }
+          }
+
+          var seen = new WeakSet();
+          function circularSafeReplacer(k, v) {
+            if (v !== null && typeof v === 'object') {
+              if (v instanceof Element || (typeof v.nodeType === 'number' && typeof v.tagName === 'string') || v.constructor?.name === 'HTMLVideoElement') {
+                return '[DOM ' + (v.tagName || 'Element') + ']';
+              }
+              if (v.constructor && (v.constructor.name === 'FiberNode' || v.constructor.name === 'SyntheticBaseEvent')) {
+                return '[' + v.constructor.name + ']';
+              }
+              if (seen.has(v)) {
+                return '[Circular]';
+              }
+              seen.add(v);
+            }
+            if (typeof replacer === 'function') {
+              return replacer.call(this, k, v);
+            }
+            return v;
+          }
+
+          try {
+            return _nativeStringify.call(this, value, circularSafeReplacer, space);
+          } catch (_) {
+            try {
+              return _nativeStringify.call(this, value, function(key, val) {
+                if (val !== null && typeof val === 'object') {
+                  if (val instanceof Element || val.nodeType || val.constructor?.name === 'FiberNode') {
+                    return '[Object]';
+                  }
+                }
+                return val;
+              }, space);
+            } catch (fallbackErr) {
+              return '{}';
+            }
+          }
+        };
+      })();
+
+      // Global error listener to log and surface fatal startup issues
+      window.addEventListener('error', function(e) {
+        try {
+          var msg = e.message || String(e);
+          var filename = e.filename || '';
+          if (msg.includes('WebSocket') || filename.includes('@vite/client') || msg.includes('HMR') || msg === 'Script error.') {
+            return;
+          }
+          var payload = {
+            type: 'uncaught_error',
+            message: msg,
+            filename: filename,
+            lineno: e.lineno || 0,
+            colno: e.colno || 0,
+            stack: e.error ? e.error.stack : null,
+            url: window.location.href
+          };
+          if (typeof fetch === 'function') {
+            fetch('/api/log_client_error', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+            }).catch(function() {});
+          }
+        } catch (_) {}
+      });
+
+      window.addEventListener('unhandledrejection', function(e) {
+        try {
+          var reason = e.reason;
+          var msg = reason ? (reason.message || String(reason)) : '';
+          var stack = reason && reason.stack ? String(reason.stack) : '';
+
+          if (msg.includes('WebSocket') || stack.includes('WebSocket') || msg.includes('HMR') || stack.includes('@vite/client') || msg === 'Script error.') {
+            if (e.preventDefault) e.preventDefault();
+            return;
+          }
+
+          var payload = {
+            type: 'unhandled_rejection',
+            message: msg || 'Unknown rejection',
+            stack: stack || null,
+            url: window.location.href
+          };
+          if (typeof fetch === 'function') {
+            fetch('/api/log_client_error', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+            }).catch(function() {});
+          }
+        } catch (_) {}
+      });
+    </script>
+  </head>
+  <body style="background-color: #030712; color: #ffffff; min-height: 100vh;">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+

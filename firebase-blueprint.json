@@ -1,0 +1,47 @@
+{
+  "entities": {
+    "VideoEditorProject": {
+      "title": "VideoEditorProject",
+      "description": "Video editing project containing timeline clips, captions, and audio clips",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "master_bucket_fid": { "type": "string" },
+        "mode": { "type": "string" },
+        "clips": { "type": "array" },
+        "captions": { "type": "array" },
+        "hidden_caption_ids": { "type": "array" },
+        "audio_clips": { "type": "array" },
+        "is_pinned": { "type": "boolean" },
+        "created_at": { "type": "number" },
+        "updated_at": { "type": "number" },
+        "user_email": { "type": "string" }
+      },
+      "required": ["id", "name", "master_bucket_fid"]
+    },
+    "AppDatabase": {
+      "title": "AppDatabase",
+      "description": "Fast cloud snapshot of the application database for instant speed and syncing",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "version": { "type": "number" },
+        "updated_at": { "type": "number" },
+        "data_json": { "type": "string" },
+        "last_sync_email": { "type": "string" }
+      },
+      "required": ["id", "updated_at"]
+    }
+  },
+  "firestore": {
+    "/video_editor_projects/{projectId}": {
+      "schema": "VideoEditorProject",
+      "description": "Stores video editor projects for persistence"
+    },
+    "/app_db/{docId}": {
+      "schema": "AppDatabase",
+      "description": "Stores global database snapshots for fast loading"
+    }
+  }
+}

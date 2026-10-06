@@ -1,0 +1,15 @@
+.git
+.gcloudignore
+.git/
+.gitignore
+node_modules/
+video_cache/
+temp_downloads/
+temp_merges/
+temp_uploads/
+temp_tg_split/
+db_backups/
+yt-dlp*
+bun.lock
+*.log
+.DS_Store
